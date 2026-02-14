@@ -2,10 +2,20 @@
 
 `stackctl` turns a fresh Ubuntu VM (22.04/24.04) into a reproducible Docker Compose platform with environment-specific, toggleable modules.
 
-- Environments: `prod`, `devqa`
+- Environments: `dev`, `qa`, `prod`
 - Module toggles: Docker Compose profiles
 - Generated paths: `/srv/stack`, `/srv/data`, `/srv/backups`
 - Secure-by-default networking: only nginx binds public `80/443`; admin tools bind `127.0.0.1`
+
+## Goal
+
+Use one CLI to bootstrap and operate three isolated stack environments on the same host:
+
+- `dev`: fast iteration and feature testing
+- `qa`: integration and release validation
+- `prod`: production runtime
+
+Each environment gets its own config, data, backups, and module toggles under `/srv/*/<env>`.
 
 ## Quickstart
 
@@ -13,28 +23,40 @@
 # 1) Install stackctl safely (installs binary + templates only)
 ./install.sh
 
-# 2) Initialize prod stack layout
+# 2) Initialize environment layout (repeat for dev, qa, prod)
+stackctl init --env dev --domain dev.example.com --email admin@example.com
+stackctl init --env qa --domain qa.example.com --email admin@example.com
 stackctl init --env prod --domain example.com --email admin@example.com
 
-# 3) Enable Jaeger module in prod
-stackctl enable jaeger --env prod
+# 3) Enable modules per environment
+stackctl enable jaeger --env qa
+stackctl enable backup --env prod
 
 # 4) Reconcile running services
+stackctl apply --env qa
 stackctl apply --env prod
 
 # 5) Check status
 stackctl status --env prod
 ```
 
+## Environment workflow
+
+1. Initialize each environment once with `stackctl init --env <env>`.
+2. Set secrets in `/srv/stack/<env>/.env`.
+3. Toggle modules using `stackctl enable/disable <module> --env <env>`.
+4. Reconcile state using `stackctl apply --env <env>`.
+5. Use `stackctl backup --env <env>` and migration scripts per environment.
+
 ## Commands
 
 ```bash
-stackctl init --env prod|devqa [--domain example.com] [--email admin@example.com]
-stackctl enable <module> --env prod|devqa
-stackctl disable <module> --env prod|devqa
-stackctl status --env prod|devqa
-stackctl apply --env prod|devqa
-stackctl backup --env prod|devqa
+stackctl init --env dev|qa|prod [--domain example.com] [--email admin@example.com]
+stackctl enable <module> --env dev|qa|prod
+stackctl disable <module> --env dev|qa|prod
+stackctl status --env dev|qa|prod
+stackctl apply --env dev|qa|prod
+stackctl backup --env dev|qa|prod
 stackctl doctor
 ```
 
@@ -89,7 +111,7 @@ Two supported approaches:
 
 1. Restore `/srv/stack`.
 2. Restore `/srv/data`.
-3. Run `stackctl apply --env <env>`.
+3. Run `stackctl apply --env dev`, `stackctl apply --env qa`, and/or `stackctl apply --env prod`.
 4. Validate with `stackctl doctor`.
 
 See `docs/migration.md` for full flow and `.tar.zst` helpers.
@@ -97,11 +119,11 @@ See `docs/migration.md` for full flow and `.tar.zst` helpers.
 ## Manual test plan (v1)
 
 1. `stackctl doctor` on fresh host.
-2. `stackctl init --env prod ...` and verify generated files.
-3. Set secrets in `/srv/stack/prod/.env`.
-4. `stackctl apply --env prod`; confirm core containers healthy.
-5. Enable module (`jaeger`), apply, and confirm service starts.
-6. Disable module, apply, and confirm service is removed.
+2. `stackctl init --env dev ...`, `stackctl init --env qa ...`, `stackctl init --env prod ...`.
+3. Set secrets in `/srv/stack/dev/.env`, `/srv/stack/qa/.env`, `/srv/stack/prod/.env`.
+4. `stackctl apply --env <env>` for each target environment; confirm core containers healthy.
+5. Enable module (`jaeger`) in `qa`, apply, and confirm service starts.
+6. Disable module in `qa`, apply, and confirm service is removed.
 7. Run `stackctl backup --env prod` and validate backup files in `/srv/backups/prod/`.
 8. Reboot VM and verify systemd auto-start behavior.
 

@@ -28,9 +28,9 @@ Modules are overlays under `templates/modules/<module>/` and each service is att
 ## Enable/disable workflow
 
 ```bash
-stackctl enable jaeger --env prod
-stackctl disable jaeger --env prod
-stackctl apply --env prod
+stackctl enable jaeger --env qa
+stackctl disable jaeger --env qa
+stackctl apply --env qa
 ```
 
 `apply` re-renders generated files and runs `docker compose up -d --remove-orphans` with enabled profile flags.

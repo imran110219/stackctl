@@ -149,12 +149,12 @@ func usage() {
 	fmt.Println(`stackctl - new VM to production-ready Docker Compose stack
 
 Usage:
-  stackctl init --env prod|devqa [--domain example.com] [--email admin@example.com]
-  stackctl enable <module> --env prod|devqa
-  stackctl disable <module> --env prod|devqa
-  stackctl status --env prod|devqa
-  stackctl apply --env prod|devqa
-  stackctl backup --env prod|devqa
+  stackctl init --env dev|qa|prod [--domain example.com] [--email admin@example.com]
+  stackctl enable <module> --env dev|qa|prod
+  stackctl disable <module> --env dev|qa|prod
+  stackctl status --env dev|qa|prod
+  stackctl apply --env dev|qa|prod
+  stackctl backup --env dev|qa|prod
   stackctl doctor
 
 Available modules:`)
@@ -172,7 +172,7 @@ Available modules:`)
 
 func runInit(args []string) error {
 	fs := flag.NewFlagSet("init", flag.ContinueOnError)
-	env := fs.String("env", "", "environment name: prod or devqa")
+	env := fs.String("env", "", "environment name: dev, qa, or prod")
 	domain := fs.String("domain", "example.com", "base domain")
 	email := fs.String("email", "admin@example.com", "ops email")
 	if err := fs.Parse(args); err != nil {
@@ -497,8 +497,8 @@ func runDoctor() error {
 
 func loadEnvConfig(env string) (envConfig, error) {
 	env = strings.TrimSpace(env)
-	if env != "prod" && env != "devqa" {
-		return envConfig{}, errors.New("--env must be prod or devqa")
+	if env != "dev" && env != "qa" && env != "prod" {
+		return envConfig{}, errors.New("--env must be one of: dev, qa, prod")
 	}
 	stackRoot := getStackRoot()
 	cfg := envConfig{

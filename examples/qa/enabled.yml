@@ -1,0 +1,4 @@
+modules:
+  - dozzle
+  - jaeger
+  - kuma

@@ -5,7 +5,7 @@
 1. Restore `/srv/stack` (configs, compose files, `.env`, enabled modules).
 2. Restore `/srv/data` (volumes).
 3. Install Docker + Compose v2 and `stackctl`.
-4. Run `stackctl apply --env prod` (and/or `devqa`).
+4. Run `stackctl apply --env dev`, `stackctl apply --env qa`, and/or `stackctl apply --env prod`.
 5. Validate with `stackctl doctor`.
 
 ## Backup/restore
