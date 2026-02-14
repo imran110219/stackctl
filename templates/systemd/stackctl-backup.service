@@ -1,0 +1,7 @@
+[Unit]
+Description=stackctl backup for {{ENV}}
+After=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/stackctl backup --env {{ENV}}

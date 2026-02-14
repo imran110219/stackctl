@@ -1,0 +1,25 @@
+services:
+  dozzle:
+    image: amir20/dozzle:v8
+    profiles: ["dozzle"]
+    restart: unless-stopped
+    environment:
+      DOCKER_HOST: tcp://socket-proxy:2375
+      DOZZLE_LEVEL: info
+    depends_on:
+      socket-proxy:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:9999:8080"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8080"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - app_net

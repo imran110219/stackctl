@@ -1,0 +1,17 @@
+services:
+  backup-runner:
+    image: alpine:3.20
+    profiles: ["backup"]
+    restart: unless-stopped
+    command: ["sh", "-c", "trap exit TERM; while :; do sleep 12h; done"]
+    volumes:
+      - /srv/backups/{{ENV}}:/backups
+      - /srv/stack/{{ENV}}:/stack:ro
+      - /srv/data/{{ENV}}:/data:ro
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - app_net

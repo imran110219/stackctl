@@ -1,0 +1,18 @@
+services:
+  alertmanager:
+    image: prom/alertmanager:v0.27.0
+    profiles: ["alertmanager"]
+    restart: unless-stopped
+    command:
+      - --config.file=/etc/alertmanager/alertmanager.yml
+    volumes:
+      - /srv/stack/{{ENV}}/alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+    ports:
+      - "127.0.0.1:9093:9093"
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - app_net

@@ -1,0 +1,19 @@
+services:
+  node-exporter:
+    image: prom/node-exporter:v1.8.2
+    profiles: ["node-exporter"]
+    restart: unless-stopped
+    command:
+      - --path.rootfs=/host
+    pid: host
+    volumes:
+      - /:/host:ro,rslave
+    ports:
+      - "127.0.0.1:9100:9100"
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - app_net

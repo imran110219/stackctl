@@ -1,0 +1,17 @@
+services:
+  loki:
+    image: grafana/loki:3.1.0
+    profiles: ["loki"]
+    restart: unless-stopped
+    command: ["-config.file=/etc/loki/local-config.yaml"]
+    volumes:
+      - /srv/data/{{ENV}}/loki:/loki
+    ports:
+      - "127.0.0.1:3100:3100"
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - app_net
