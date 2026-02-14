@@ -4,7 +4,7 @@ services:
     profiles: ["kuma"]
     restart: unless-stopped
     volumes:
-      - /srv/data/{{ENV}}/kuma:/app/data
+      - /srv/data/{{.Env}}/kuma:/app/data
     ports:
       - "127.0.0.1:3001:3001"
     healthcheck:

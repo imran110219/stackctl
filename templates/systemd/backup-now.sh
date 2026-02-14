@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ENV_NAME="{{ENV}}"
-STACK_ROOT="{{STACK_ROOT}}"
-DATA_ROOT="{{DATA_ROOT}}"
-BACKUP_ROOT="{{BACKUP_ROOT}}"
+ENV_NAME="{{.Env}}"
+STACK_ROOT="{{.StackRoot}}"
+DATA_ROOT="{{.DataRoot}}"
+BACKUP_ROOT="{{.BackupRoot}}"
 
 TIMESTAMP="$(date -u +%Y%m%dT%H%M%SZ)"
 TARGET_DIR="${BACKUP_ROOT}/${ENV_NAME}"

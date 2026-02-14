@@ -1,13 +1,13 @@
 [Unit]
-Description=stackctl apply for {{ENV}}
+Description=stackctl apply for {{.Env}}
 Requires=docker.service
 After=docker.service network-online.target
 Wants=network-online.target
 
 [Service]
 Type=oneshot
-WorkingDirectory={{STACK_ROOT}}
-ExecStart=/usr/local/bin/stackctl apply --env {{ENV}}
+WorkingDirectory={{.StackRoot}}
+ExecStart=/usr/local/bin/stackctl apply --env {{.Env}}
 RemainAfterExit=yes
 
 [Install]

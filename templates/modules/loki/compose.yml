@@ -5,7 +5,7 @@ services:
     restart: unless-stopped
     command: ["-config.file=/etc/loki/local-config.yaml"]
     volumes:
-      - /srv/data/{{ENV}}/loki:/loki
+      - /srv/data/{{.Env}}/loki:/loki
     ports:
       - "127.0.0.1:3100:3100"
     logging:

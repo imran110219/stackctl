@@ -1,10 +1,10 @@
 [Unit]
-Description=Nightly stackctl backup timer for {{ENV}}
+Description=Nightly stackctl backup timer for {{.Env}}
 
 [Timer]
 OnCalendar=*-*-* 02:30:00
 Persistent=true
-Unit=stackctl-backup-{{ENV}}.service
+Unit=stackctl-backup-{{.Env}}.service
 
 [Install]
 WantedBy=timers.target

@@ -6,7 +6,7 @@ services:
     command:
       - --config.file=/etc/alertmanager/alertmanager.yml
     volumes:
-      - /srv/stack/{{ENV}}/alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+      - /srv/stack/{{.Env}}/alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
     ports:
       - "127.0.0.1:9093:9093"
     logging:

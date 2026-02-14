@@ -5,7 +5,7 @@ services:
     restart: unless-stopped
     command: ["sh", "-c", "trap exit TERM; while :; do sleep 12h; done"]
     volumes:
-      - /srv/data/{{ENV}}/certbot:/etc/letsencrypt
+      - /srv/data/{{.Env}}/certbot:/etc/letsencrypt
     logging:
       driver: json-file
       options:

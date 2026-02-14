@@ -7,7 +7,7 @@ services:
       GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER}
       GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD}
     volumes:
-      - /srv/data/{{ENV}}/grafana:/var/lib/grafana
+      - /srv/data/{{.Env}}/grafana:/var/lib/grafana
     ports:
       - "127.0.0.1:3000:3000"
     healthcheck:

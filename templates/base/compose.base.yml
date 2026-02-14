@@ -1,4 +1,4 @@
-name: {{ENV}}
+name: {{.Env}}
 
 x-default-logging: &default-logging
   logging:
@@ -15,8 +15,8 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - /srv/stack/{{ENV}}/nginx/conf.d:/etc/nginx/conf.d:ro
-      - /srv/data/{{ENV}}/nginx:/var/cache/nginx
+      - /srv/stack/{{.Env}}/nginx/conf.d:/etc/nginx/conf.d:ro
+      - /srv/data/{{.Env}}/nginx:/var/cache/nginx
     depends_on:
       frontend:
         condition: service_started
@@ -39,7 +39,7 @@ services:
     expose:
       - "8080"
     volumes:
-      - /srv/data/{{ENV}}/frontend:/usr/share/nginx/html:ro
+      - /srv/data/{{.Env}}/frontend:/usr/share/nginx/html:ro
     healthcheck:
       test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8080"]
       interval: 30s
@@ -107,7 +107,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
     volumes:
-      - /srv/data/{{ENV}}/postgres:/var/lib/postgresql/data
+      - /srv/data/{{.Env}}/postgres:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
       interval: 15s
@@ -128,7 +128,7 @@ services:
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     volumes:
-      - /srv/data/{{ENV}}/mariadb:/var/lib/mysql
+      - /srv/data/{{.Env}}/mariadb:/var/lib/mysql
     healthcheck:
       test: ["CMD", "mariadb-admin", "ping", "-h", "127.0.0.1", "-u", "root", "--password=${MYSQL_ROOT_PASSWORD}"]
       interval: 20s
@@ -140,4 +140,4 @@ services:
 
 networks:
   app_net:
-    name: {{NETWORK_NAME}}
+    name: {{.NetworkName}}

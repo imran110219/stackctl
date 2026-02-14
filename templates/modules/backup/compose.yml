@@ -5,9 +5,9 @@ services:
     restart: unless-stopped
     command: ["sh", "-c", "trap exit TERM; while :; do sleep 12h; done"]
     volumes:
-      - /srv/backups/{{ENV}}:/backups
-      - /srv/stack/{{ENV}}:/stack:ro
-      - /srv/data/{{ENV}}:/data:ro
+      - /srv/backups/{{.Env}}:/backups
+      - /srv/stack/{{.Env}}:/stack:ro
+      - /srv/data/{{.Env}}:/data:ro
     logging:
       driver: json-file
       options:
