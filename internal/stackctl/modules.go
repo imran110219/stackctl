@@ -9,80 +9,92 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-type moduleInfo struct {
+type ModuleInfo struct {
 	Name        string
 	Description string
 	Ports       []string
+	Category    string
 }
 
-var moduleCatalog = map[string]moduleInfo{
+var ModuleCatalog = map[string]ModuleInfo{
 	"socket-proxy": {
 		Name:        "socket-proxy",
 		Description: "Docker socket proxy for safer container API access",
 		Ports:       []string{"127.0.0.1:2375"},
+		Category:    "Infrastructure",
 	},
 	"dozzle": {
 		Name:        "dozzle",
 		Description: "Container log viewer",
 		Ports:       []string{"127.0.0.1:9999"},
+		Category:    "Observability",
 	},
 	"node-exporter": {
 		Name:        "node-exporter",
 		Description: "Host metrics exporter",
 		Ports:       []string{"127.0.0.1:9100"},
+		Category:    "Observability",
 	},
 	"prometheus": {
 		Name:        "prometheus",
 		Description: "Metrics scraping and storage",
 		Ports:       []string{"127.0.0.1:9090"},
+		Category:    "Observability",
 	},
 	"alertmanager": {
 		Name:        "alertmanager",
 		Description: "Alert routing",
 		Ports:       []string{"127.0.0.1:9093"},
+		Category:    "Observability",
 	},
 	"grafana": {
 		Name:        "grafana",
 		Description: "Dashboards",
 		Ports:       []string{"127.0.0.1:3000"},
+		Category:    "Observability",
 	},
 	"loki": {
 		Name:        "loki",
 		Description: "Log aggregation",
 		Ports:       []string{"127.0.0.1:3100"},
+		Category:    "Observability",
 	},
 	"jaeger": {
 		Name:        "jaeger",
 		Description: "Distributed tracing",
 		Ports:       []string{"127.0.0.1:16686", "127.0.0.1:4317", "127.0.0.1:4318"},
+		Category:    "Observability",
 	},
 	"kuma": {
 		Name:        "kuma",
 		Description: "Uptime Kuma monitoring",
 		Ports:       []string{"127.0.0.1:3001"},
+		Category:    "Infrastructure",
 	},
 	"certbot": {
 		Name:        "certbot",
 		Description: "Optional certificate management helper",
 		Ports:       []string{},
+		Category:    "Infrastructure",
 	},
 	"backup": {
 		Name:        "backup",
 		Description: "Backup sidecar tools and hooks",
 		Ports:       []string{},
+		Category:    "Utilities",
 	},
 }
 
-var moduleDependencies = map[string][]string{
+var ModuleDependencies = map[string][]string{
 	"dozzle": {"socket-proxy"},
 }
 
-type enabledConfig struct {
+type EnabledConfig struct {
 	Modules []string `yaml:"modules"`
 }
 
-func loadEnabledModules(cfg envConfig) ([]string, error) {
-	enabled, err := loadEnabled(cfg)
+func LoadEnabledModules(cfg EnvConfig) ([]string, error) {
+	enabled, err := LoadEnabled(cfg)
 	if err != nil {
 		return nil, err
 	}
@@ -92,29 +104,29 @@ func loadEnabledModules(cfg envConfig) ([]string, error) {
 
 	mods := make([]string, 0, len(enabled.Modules))
 	for _, m := range enabled.Modules {
-		if _, ok := moduleCatalog[m]; ok {
+		if _, ok := ModuleCatalog[m]; ok {
 			mods = append(mods, m)
 		}
 	}
-	mods = addModuleDependencies(mods)
+	mods = AddModuleDependencies(mods)
 	sort.Strings(mods)
 	return mods, nil
 }
 
-func loadEnabled(cfg envConfig) (enabledConfig, error) {
+func LoadEnabled(cfg EnvConfig) (EnabledConfig, error) {
 	path := filepath.Join(cfg.EnvDir, "enabled.yml")
 	b, err := os.ReadFile(path)
 	if err != nil {
-		return enabledConfig{}, err
+		return EnabledConfig{}, err
 	}
-	var conf enabledConfig
+	var conf EnabledConfig
 	if err := yaml.Unmarshal(b, &conf); err != nil {
-		return enabledConfig{}, err
+		return EnabledConfig{}, err
 	}
 	return conf, nil
 }
 
-func writeEnabled(cfg envConfig, conf enabledConfig) error {
+func WriteEnabled(cfg EnvConfig, conf EnabledConfig) error {
 	path := filepath.Join(cfg.EnvDir, "enabled.yml")
 	out, err := yaml.Marshal(conf)
 	if err != nil {
@@ -123,13 +135,13 @@ func writeEnabled(cfg envConfig, conf enabledConfig) error {
 	return os.WriteFile(path, out, 0o640)
 }
 
-func addModuleDependencies(modules []string) []string {
+func AddModuleDependencies(modules []string) []string {
 	set := map[string]bool{}
 	for _, m := range modules {
 		set[m] = true
 	}
 	for _, m := range modules {
-		for _, dep := range moduleDependencies[m] {
+		for _, dep := range ModuleDependencies[m] {
 			set[dep] = true
 		}
 	}
@@ -140,9 +152,9 @@ func addModuleDependencies(modules []string) []string {
 	return out
 }
 
-func sortedModuleNames() []string {
-	names := make([]string, 0, len(moduleCatalog))
-	for name := range moduleCatalog {
+func SortedModuleNames() []string {
+	names := make([]string, 0, len(ModuleCatalog))
+	for name := range ModuleCatalog {
 		names = append(names, name)
 	}
 	sort.Strings(names)
@@ -150,7 +162,7 @@ func sortedModuleNames() []string {
 }
 
 func sortedModulePorts(name string) string {
-	m, ok := moduleCatalog[name]
+	m, ok := ModuleCatalog[name]
 	if !ok || len(m.Ports) == 0 {
 		return "-"
 	}

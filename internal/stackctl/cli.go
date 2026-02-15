@@ -32,7 +32,7 @@ func Run(args []string) error {
 	case "backup":
 		return cmdBackup(cmdArgs)
 	case "doctor":
-		return runDoctor()
+		return RunDoctor()
 	case "help", "--help", "-h":
 		usage()
 		return nil
@@ -52,12 +52,13 @@ Usage:
   stackctl apply --env dev|qa|prod
   stackctl backup --env dev|qa|prod
   stackctl doctor
+  stackctl setup                    # interactive setup wizard
 
 Available modules:`)
 
-	names := sortedModuleNames()
+	names := SortedModuleNames()
 	for _, name := range names {
-		m := moduleCatalog[name]
+		m := ModuleCatalog[name]
 		fmt.Printf("  - %-14s %-45s ports: %s\n", m.Name, m.Description, sortedModulePorts(name))
 	}
 }
@@ -71,14 +72,14 @@ func cmdInit(args []string) error {
 		return err
 	}
 
-	cfg, err := loadEnvConfig(*env)
+	cfg, err := LoadEnvConfig(*env)
 	if err != nil {
 		return err
 	}
 	cfg.Domain = *domain
 	cfg.Email = *email
 
-	return runInit(cfg)
+	return RunInit(cfg)
 }
 
 func cmdEnableDisable(args []string, enable bool) error {
@@ -86,7 +87,7 @@ func cmdEnableDisable(args []string, enable bool) error {
 		return errors.New("module is required")
 	}
 	module := args[0]
-	if _, ok := moduleCatalog[module]; !ok {
+	if _, ok := ModuleCatalog[module]; !ok {
 		return fmt.Errorf("unknown module: %s", module)
 	}
 
@@ -96,12 +97,12 @@ func cmdEnableDisable(args []string, enable bool) error {
 		return err
 	}
 
-	cfg, err := loadEnvConfig(*env)
+	cfg, err := LoadEnvConfig(*env)
 	if err != nil {
 		return err
 	}
 
-	current, err := loadEnabled(cfg)
+	current, err := LoadEnabled(cfg)
 	if err != nil {
 		return err
 	}
@@ -126,7 +127,7 @@ func cmdEnableDisable(args []string, enable bool) error {
 	}
 
 	sort.Strings(current.Modules)
-	if err := writeEnabled(cfg, current); err != nil {
+	if err := WriteEnabled(cfg, current); err != nil {
 		return err
 	}
 
@@ -154,16 +155,16 @@ func cmdStatus(args []string) error {
 		return err
 	}
 
-	cfg, err := loadEnvConfig(*env)
+	cfg, err := LoadEnvConfig(*env)
 	if err != nil {
 		return err
 	}
 
-	if err := hydrateFromDotEnv(&cfg); err != nil {
+	if err := HydrateFromDotEnv(&cfg); err != nil {
 		return err
 	}
 
-	modules, err := loadEnabledModules(cfg)
+	modules, err := LoadEnabledModules(cfg)
 	if err != nil {
 		return err
 	}
@@ -191,16 +192,16 @@ func cmdApply(args []string) error {
 		return err
 	}
 
-	cfg, err := loadEnvConfig(*env)
+	cfg, err := LoadEnvConfig(*env)
 	if err != nil {
 		return err
 	}
 
-	if err := hydrateFromDotEnv(&cfg); err != nil {
+	if err := HydrateFromDotEnv(&cfg); err != nil {
 		return err
 	}
 
-	modules, err := loadEnabledModules(cfg)
+	modules, err := LoadEnabledModules(cfg)
 	if err != nil {
 		return err
 	}
@@ -239,12 +240,12 @@ func cmdBackup(args []string) error {
 		return err
 	}
 
-	cfg, err := loadEnvConfig(*env)
+	cfg, err := LoadEnvConfig(*env)
 	if err != nil {
 		return err
 	}
 
-	if err := hydrateFromDotEnv(&cfg); err != nil {
+	if err := HydrateFromDotEnv(&cfg); err != nil {
 		return err
 	}
 

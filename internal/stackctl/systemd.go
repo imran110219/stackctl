@@ -6,9 +6,9 @@ import (
 	"path/filepath"
 )
 
-func writeSystemdFiles(cfg envConfig) error {
+func writeSystemdFiles(cfg EnvConfig) error {
 	templates := findTemplatesDir()
-	data := cfg.renderData()
+	data := cfg.RenderData()
 	targetDir := filepath.Join(cfg.EnvDir, "systemd")
 	if err := ensureDir(targetDir, 0o750); err != nil {
 		return err
@@ -55,9 +55,9 @@ func writeSystemdFiles(cfg envConfig) error {
 	return nil
 }
 
-func writeBackupScript(cfg envConfig) error {
+func writeBackupScript(cfg EnvConfig) error {
 	templates := findTemplatesDir()
-	data := cfg.renderData()
+	data := cfg.RenderData()
 	tplPath := filepath.Join(templates, "systemd", "backup-now.sh")
 	text, err := renderFile(tplPath, data)
 	if err != nil {

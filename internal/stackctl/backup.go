@@ -10,8 +10,8 @@ import (
 	"time"
 )
 
-func runBackup(cfg envConfig) error {
-	envMap, err := readDotEnv(filepath.Join(cfg.EnvDir, ".env"))
+func runBackup(cfg EnvConfig) error {
+	envMap, err := ReadDotEnv(filepath.Join(cfg.EnvDir, ".env"))
 	if err != nil {
 		return err
 	}
@@ -57,7 +57,7 @@ func runBackup(cfg envConfig) error {
 
 // backupIfRunning pipes the dump command output through Go's gzip writer
 // instead of constructing a shell pipeline, eliminating shell interpolation.
-func backupIfRunning(cfg envConfig, service, outName, dumpCmd string) error {
+func backupIfRunning(cfg EnvConfig, service, outName, dumpCmd string) error {
 	if !composeServiceExists(cfg, service) {
 		fmt.Printf("skip %s dump (service not defined)\n", service)
 		return nil

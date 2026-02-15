@@ -8,7 +8,7 @@ import (
 	"text/template"
 )
 
-type renderData struct {
+type RenderData struct {
 	Env         string
 	Domain      string
 	Email       string
@@ -18,7 +18,7 @@ type renderData struct {
 	BackupRoot  string
 }
 
-func renderFile(path string, data renderData) (string, error) {
+func renderFile(path string, data RenderData) (string, error) {
 	content, err := os.ReadFile(path)
 	if err != nil {
 		return "", err
@@ -26,7 +26,7 @@ func renderFile(path string, data renderData) (string, error) {
 	return renderString(string(content), data)
 }
 
-func renderString(content string, data renderData) (string, error) {
+func renderString(content string, data RenderData) (string, error) {
 	tmpl, err := template.New("").Option("missingkey=error").Parse(content)
 	if err != nil {
 		return "", err

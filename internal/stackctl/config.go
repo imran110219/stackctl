@@ -14,7 +14,7 @@ const (
 	defaultBackupRoot = "/srv/backups"
 )
 
-type envConfig struct {
+type EnvConfig struct {
 	EnvName    string
 	StackRoot  string
 	DataRoot   string
@@ -24,8 +24,8 @@ type envConfig struct {
 	Email      string
 }
 
-func (cfg envConfig) renderData() renderData {
-	return renderData{
+func (cfg EnvConfig) RenderData() RenderData {
+	return RenderData{
 		Env:         cfg.EnvName,
 		Domain:      cfg.Domain,
 		Email:       cfg.Email,
@@ -36,13 +36,13 @@ func (cfg envConfig) renderData() renderData {
 	}
 }
 
-func loadEnvConfig(env string) (envConfig, error) {
+func LoadEnvConfig(env string) (EnvConfig, error) {
 	env = strings.TrimSpace(env)
 	if env != "dev" && env != "qa" && env != "prod" {
-		return envConfig{}, errors.New("--env must be one of: dev, qa, prod")
+		return EnvConfig{}, errors.New("--env must be one of: dev, qa, prod")
 	}
 	stackRoot := getStackRoot()
-	cfg := envConfig{
+	cfg := EnvConfig{
 		EnvName:    env,
 		StackRoot:  stackRoot,
 		DataRoot:   getDataRoot(),
@@ -52,8 +52,8 @@ func loadEnvConfig(env string) (envConfig, error) {
 	return cfg, nil
 }
 
-func hydrateFromDotEnv(cfg *envConfig) error {
-	m, err := readDotEnv(filepath.Join(cfg.EnvDir, ".env"))
+func HydrateFromDotEnv(cfg *EnvConfig) error {
+	m, err := ReadDotEnv(filepath.Join(cfg.EnvDir, ".env"))
 	if err != nil {
 		return err
 	}
@@ -66,7 +66,7 @@ func hydrateFromDotEnv(cfg *envConfig) error {
 	return nil
 }
 
-func readDotEnv(path string) (map[string]string, error) {
+func ReadDotEnv(path string) (map[string]string, error) {
 	file, err := os.Open(path)
 	if err != nil {
 		return nil, err

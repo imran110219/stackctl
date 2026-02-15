@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 )
 
-func runInit(cfg envConfig) error {
+func RunInit(cfg EnvConfig) error {
 	if err := ensureDir(cfg.EnvDir, 0o750); err != nil {
 		return err
 	}
@@ -33,7 +33,7 @@ func runInit(cfg envConfig) error {
 		return err
 	}
 
-	modules, err := loadEnabledModules(cfg)
+	modules, err := LoadEnabledModules(cfg)
 	if err != nil {
 		return err
 	}
@@ -59,7 +59,7 @@ func runInit(cfg envConfig) error {
 	return nil
 }
 
-func ensureEnvDirs(cfg envConfig) error {
+func ensureEnvDirs(cfg EnvConfig) error {
 	dirs := []string{
 		cfg.EnvDir,
 		filepath.Join(cfg.EnvDir, "nginx", "conf.d"),
@@ -84,23 +84,23 @@ func ensureEnvDirs(cfg envConfig) error {
 	return nil
 }
 
-func ensureDefaultEnabled(cfg envConfig) error {
+func ensureDefaultEnabled(cfg EnvConfig) error {
 	path := filepath.Join(cfg.EnvDir, "enabled.yml")
 	if _, err := os.Stat(path); err == nil {
 		return nil
 	}
-	def := enabledConfig{Modules: []string{}}
-	return writeEnabled(cfg, def)
+	def := EnabledConfig{Modules: []string{}}
+	return WriteEnabled(cfg, def)
 }
 
-func ensureDotEnv(cfg envConfig) error {
+func ensureDotEnv(cfg EnvConfig) error {
 	target := filepath.Join(cfg.EnvDir, ".env")
 	if _, err := os.Stat(target); err == nil {
 		return nil
 	}
 
 	tplPath := filepath.Join(findTemplatesDir(), ".env.example")
-	data := cfg.renderData()
+	data := cfg.RenderData()
 	text, err := renderFile(tplPath, data)
 	if err != nil {
 		return fmt.Errorf("render .env template: %w", err)
@@ -108,7 +108,7 @@ func ensureDotEnv(cfg envConfig) error {
 	return os.WriteFile(target, []byte(text), 0o640)
 }
 
-func ensureComposeOverride(cfg envConfig) error {
+func ensureComposeOverride(cfg EnvConfig) error {
 	target := filepath.Join(cfg.EnvDir, "compose.override.yml")
 	if _, err := os.Stat(target); err == nil {
 		return nil

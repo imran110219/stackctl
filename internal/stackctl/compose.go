@@ -12,9 +12,9 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-func writeCompose(cfg envConfig, enabledModules []string) error {
+func writeCompose(cfg EnvConfig, enabledModules []string) error {
 	templates := findTemplatesDir()
-	data := cfg.renderData()
+	data := cfg.RenderData()
 
 	basePath := filepath.Join(templates, "base", "compose.base.yml")
 	rendered, err := renderFile(basePath, data)
@@ -86,7 +86,7 @@ func deepMerge(dst, src map[string]any) {
 	}
 }
 
-func syncModuleAssets(cfg envConfig) error {
+func syncModuleAssets(cfg EnvConfig) error {
 	templates := findTemplatesDir()
 	modulesDir := filepath.Join(templates, "modules")
 	entries, err := os.ReadDir(modulesDir)
@@ -133,7 +133,7 @@ func syncModuleAssets(cfg envConfig) error {
 	return nil
 }
 
-func composeBaseArgs(cfg envConfig) []string {
+func composeBaseArgs(cfg EnvConfig) []string {
 	return []string{
 		"compose",
 		"-f", filepath.Join(cfg.EnvDir, "compose.yml"),
@@ -143,7 +143,7 @@ func composeBaseArgs(cfg envConfig) []string {
 	}
 }
 
-func composeServiceExists(cfg envConfig, service string) bool {
+func composeServiceExists(cfg EnvConfig, service string) bool {
 	args := composeBaseArgs(cfg)
 	args = append(args, "config", "--services")
 	out, err := runCmdCapture("docker", args...)
@@ -158,7 +158,7 @@ func composeServiceExists(cfg envConfig, service string) bool {
 	return false
 }
 
-func composeServiceRunning(cfg envConfig, service string) bool {
+func composeServiceRunning(cfg EnvConfig, service string) bool {
 	args := composeBaseArgs(cfg)
 	args = append(args, "ps", "-q", service)
 	out, err := runCmdCapture("docker", args...)

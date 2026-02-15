@@ -9,7 +9,7 @@ import (
 	"syscall"
 )
 
-func runDoctor() error {
+func RunDoctor() error {
 	fmt.Println("stackctl doctor")
 	fmt.Printf("runtime: %s/%s\n", runtime.GOOS, runtime.GOARCH)
 

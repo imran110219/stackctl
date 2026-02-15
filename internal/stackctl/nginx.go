@@ -6,14 +6,14 @@ import (
 	"path/filepath"
 )
 
-func writeNginxConfs(cfg envConfig, modules []string) error {
+func writeNginxConfs(cfg EnvConfig, modules []string) error {
 	confDir := filepath.Join(cfg.EnvDir, "nginx", "conf.d")
 	if err := ensureDir(confDir, 0o750); err != nil {
 		return err
 	}
 
 	templates := findTemplatesDir()
-	data := cfg.renderData()
+	data := cfg.RenderData()
 
 	render := func(templateName, targetName string) error {
 		inPath := filepath.Join(templates, "nginx", templateName)
