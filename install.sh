@@ -14,7 +14,22 @@ require() {
   fi
 }
 
-require git
+if ! command -v git >/dev/null 2>&1; then
+  if [[ "${STACKCTL_AUTO_INSTALL:-0}" == "1" ]]; then
+    if command -v apt-get >/dev/null 2>&1; then
+      echo "git not found; attempting install via apt-get"
+      sudo apt-get update
+      sudo apt-get install -y git
+    else
+      echo "git not found and apt-get is unavailable; install git and re-run" >&2
+      exit 1
+    fi
+  else
+    echo "missing required command: git" >&2
+    echo "hint: set STACKCTL_AUTO_INSTALL=1 to install git via apt-get" >&2
+    exit 1
+  fi
+fi
 
 if ! command -v go >/dev/null 2>&1; then
   if [[ "${STACKCTL_AUTO_INSTALL:-0}" == "1" ]]; then
