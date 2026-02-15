@@ -15,7 +15,23 @@ require() {
 }
 
 require git
-require go
+
+if ! command -v go >/dev/null 2>&1; then
+  if [[ "${STACKCTL_AUTO_INSTALL:-0}" == "1" ]]; then
+    if command -v apt-get >/dev/null 2>&1; then
+      echo "go not found; attempting install via apt-get"
+      sudo apt-get update
+      sudo apt-get install -y golang-go
+    else
+      echo "go not found and apt-get is unavailable; install Go and re-run" >&2
+      exit 1
+    fi
+  else
+    echo "missing required command: go" >&2
+    echo "hint: set STACKCTL_AUTO_INSTALL=1 to install Go via apt-get" >&2
+    exit 1
+  fi
+fi
 
 mkdir -p "${STACKCTL_HOME}" "${INSTALL_BIN_DIR}"
 
