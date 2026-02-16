@@ -9,10 +9,13 @@ import (
 	"syscall"
 )
 
-func RunDoctor() error {
-	fmt.Println("stackctl doctor")
-	fmt.Printf("runtime: %s/%s\n", runtime.GOOS, runtime.GOARCH)
+type CheckResult struct {
+	Name string
+	OK   bool
+	Err  error
+}
 
+func RunChecks() []CheckResult {
 	checks := []struct {
 		name string
 		fn   func() error
@@ -22,15 +25,15 @@ func RunDoctor() error {
 			return err
 		}},
 		{"docker compose", func() error {
-			_, err := runCmdCapture("docker", "compose", "version")
+			_, err := RunCmdCapture("docker", "compose", "version")
 			return err
 		}},
 		{"docker daemon", func() error {
-			_, err := runCmdCapture("docker", "info")
+			_, err := RunCmdCapture("docker", "info")
 			return err
 		}},
 		{"/srv/stack writable", func() error {
-			return writableCheck(getStackRoot())
+			return writableCheck(GetStackRoot())
 		}},
 		{"/srv/data writable", func() error {
 			return writableCheck(getDataRoot())
@@ -39,7 +42,7 @@ func RunDoctor() error {
 			return diskCheck("/srv", 5)
 		}},
 		{"ports 80/443 status", func() error {
-			out, err := runCmdCapture("ss", "-ltn")
+			out, err := RunCmdCapture("ss", "-ltn")
 			if err != nil {
 				return err
 			}
@@ -50,11 +53,28 @@ func RunDoctor() error {
 		}},
 	}
 
+	results := make([]CheckResult, 0, len(checks))
 	for _, check := range checks {
-		if err := check.fn(); err != nil {
-			fmt.Printf("[WARN] %s: %v\n", check.name, err)
+		err := check.fn()
+		results = append(results, CheckResult{
+			Name: check.name,
+			OK:   err == nil,
+			Err:  err,
+		})
+	}
+	return results
+}
+
+func RunDoctor() error {
+	fmt.Println("stackctl doctor")
+	fmt.Printf("runtime: %s/%s\n", runtime.GOOS, runtime.GOARCH)
+
+	results := RunChecks()
+	for _, r := range results {
+		if r.OK {
+			fmt.Printf("[ OK ] %s\n", r.Name)
 		} else {
-			fmt.Printf("[ OK ] %s\n", check.name)
+			fmt.Printf("[WARN] %s: %v\n", r.Name, r.Err)
 		}
 	}
 	return nil

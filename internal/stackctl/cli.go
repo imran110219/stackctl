@@ -53,6 +53,9 @@ Usage:
   stackctl backup --env dev|qa|prod
   stackctl doctor
   stackctl setup                    # interactive setup wizard
+  stackctl modules [--env dev|qa|prod]  # module manager
+  stackctl dash [--env dev|qa|prod]     # status dashboard
+  stackctl config [--env dev|qa|prod]   # configuration editor
 
 Available modules:`)
 
@@ -173,9 +176,9 @@ func cmdStatus(args []string) error {
 	fmt.Printf("path: %s\n", cfg.EnvDir)
 	fmt.Printf("enabled modules: %s\n", strings.Join(modules, ", "))
 
-	composeArgs := composeBaseArgs(cfg)
+	composeArgs := ComposeBaseArgs(cfg)
 	composeArgs = append(composeArgs, "ps")
-	output, cmdErr := runCmdCapture("docker", composeArgs...)
+	output, cmdErr := RunCmdCapture("docker", composeArgs...)
 	if cmdErr != nil {
 		fmt.Println("docker compose status unavailable:")
 		fmt.Println(strings.TrimSpace(output))
@@ -219,13 +222,13 @@ func cmdApply(args []string) error {
 		return err
 	}
 
-	composeArgs := composeBaseArgs(cfg)
+	composeArgs := ComposeBaseArgs(cfg)
 	for _, module := range modules {
 		composeArgs = append(composeArgs, "--profile", module)
 	}
 	composeArgs = append(composeArgs, "up", "-d", "--remove-orphans")
 
-	if err := runCmdStream("docker", composeArgs...); err != nil {
+	if err := RunCmdStream("docker", composeArgs...); err != nil {
 		return err
 	}
 

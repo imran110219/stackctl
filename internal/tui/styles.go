@@ -55,6 +55,43 @@ var (
 			Foreground(colorMuted).
 			MarginTop(1)
 
+	// Table and tab styles for dashboard and module manager
+	tableHeaderStyle = lipgloss.NewStyle().
+				Bold(true).
+				Foreground(colorSecondary).
+				BorderBottom(true).
+				BorderStyle(lipgloss.NormalBorder()).
+				BorderForeground(colorMuted)
+
+	activeTabStyle = lipgloss.NewStyle().
+			Bold(true).
+			Foreground(colorPrimary).
+			Border(lipgloss.RoundedBorder()).
+			BorderForeground(colorPrimary).
+			Padding(0, 2)
+
+	inactiveTabStyle = lipgloss.NewStyle().
+				Foreground(colorMuted).
+				Border(lipgloss.RoundedBorder()).
+				BorderForeground(colorMuted).
+				Padding(0, 2)
+
+	// Status indicator styles
+	statusRunning = lipgloss.NewStyle().
+			Foreground(colorSuccess).
+			Bold(true)
+
+	statusStopped = lipgloss.NewStyle().
+			Foreground(colorError)
+
+	statusUnknown = lipgloss.NewStyle().
+			Foreground(colorWarning)
+
+	// Secret masking style
+	secretStyle = lipgloss.NewStyle().
+			Foreground(colorMuted).
+			Italic(true)
+
 	cursorChar = selectedStyle.Render(">")
 	checkOn    = selectedStyle.Render("[x]")
 	checkOff   = normalStyle.Render("[ ]")

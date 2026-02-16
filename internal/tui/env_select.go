@@ -2,15 +2,18 @@ package tui
 
 import (
 	"fmt"
+	"path/filepath"
 	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/example/stackctl/internal/stackctl"
 )
 
 type envOption struct {
-	value string
-	label string
-	desc  string
+	value  string
+	label  string
+	desc   string
+	exists bool
 }
 
 type envSelectModel struct {
@@ -38,6 +41,12 @@ func (m *envSelectModel) Init() tea.Cmd {
 			break
 		}
 	}
+	// Check which environments already exist
+	stackRoot := stackctl.GetStackRoot()
+	for i := range m.options {
+		envDir := filepath.Join(stackRoot, m.options[i].value)
+		m.options[i].exists = stackctl.DirExists(envDir)
+	}
 	return nil
 }
 
@@ -54,7 +63,12 @@ func (m *envSelectModel) Update(msg tea.Msg) (screenModel, tea.Cmd) {
 			m.cursor++
 		}
 		if isEnter(msg) {
-			m.state.env = m.options[m.cursor].value
+			selected := m.options[m.cursor]
+			// Clear domain when env changes so smart defaults recalculate
+			if m.state.env != selected.value {
+				m.state.domain = ""
+			}
+			m.state.env = selected.value
 			return m, func() tea.Msg { return navigateMsg{to: screenDomainInput} }
 		}
 	}
@@ -76,7 +90,13 @@ func (m *envSelectModel) View() string {
 			radio = radioOn
 			label = selectedStyle.Render(opt.label)
 		}
-		b.WriteString(fmt.Sprintf("  %s %s\n", radio, label))
+
+		existsBadge := ""
+		if opt.exists {
+			existsBadge = " " + warningStyle.Render("[exists]")
+		}
+
+		b.WriteString(fmt.Sprintf("  %s %s%s\n", radio, label, existsBadge))
 		b.WriteString(fmt.Sprintf("      %s\n", mutedStyle.Render(opt.desc)))
 	}
 

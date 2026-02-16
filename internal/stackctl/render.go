@@ -51,7 +51,7 @@ func findTemplatesDir() string {
 			filepath.Join(binDir, "templates"),
 		}
 		for _, c := range candidates {
-			if dirExists(c) {
+			if DirExists(c) {
 				return c
 			}
 		}
@@ -60,7 +60,7 @@ func findTemplatesDir() string {
 	cwd, err := os.Getwd()
 	if err == nil {
 		c := filepath.Join(cwd, "templates")
-		if dirExists(c) {
+		if DirExists(c) {
 			return c
 		}
 	}
@@ -71,7 +71,7 @@ func findTemplatesDir() string {
 		filepath.Join(home, ".stackctl", "repo", "templates"),
 	}
 	for _, c := range fallbacks {
-		if dirExists(c) {
+		if DirExists(c) {
 			return c
 		}
 	}

@@ -58,18 +58,18 @@ func runBackup(cfg EnvConfig) error {
 // backupIfRunning pipes the dump command output through Go's gzip writer
 // instead of constructing a shell pipeline, eliminating shell interpolation.
 func backupIfRunning(cfg EnvConfig, service, outName, dumpCmd string) error {
-	if !composeServiceExists(cfg, service) {
+	if !ComposeServiceExists(cfg, service) {
 		fmt.Printf("skip %s dump (service not defined)\n", service)
 		return nil
 	}
-	if !composeServiceRunning(cfg, service) {
+	if !ComposeServiceRunning(cfg, service) {
 		fmt.Printf("skip %s dump (service not running)\n", service)
 		return nil
 	}
 
 	outPath := filepath.Join(cfg.BackupRoot, cfg.EnvName, outName)
 
-	args := append(composeBaseArgs(cfg), "exec", "-T", service, "sh", "-c", dumpCmd)
+	args := append(ComposeBaseArgs(cfg), "exec", "-T", service, "sh", "-c", dumpCmd)
 	cmd := exec.Command("docker", args...)
 
 	stdout, err := cmd.StdoutPipe()

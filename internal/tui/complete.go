@@ -9,7 +9,8 @@ import (
 )
 
 type completeModel struct {
-	state *wizardState
+	state  *wizardState
+	cursor int // 0=Setup Another, 1=Exit
 }
 
 func newCompleteModel(state *wizardState) *completeModel {
@@ -17,13 +18,27 @@ func newCompleteModel(state *wizardState) *completeModel {
 }
 
 func (m *completeModel) Init() tea.Cmd {
+	m.cursor = 1 // Default to Exit
 	return nil
 }
 
 func (m *completeModel) Update(msg tea.Msg) (screenModel, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
-		if isEnter(msg) || msg.String() == "q" || isEsc(msg) {
+		if isLeft(msg) && m.cursor > 0 {
+			m.cursor--
+		}
+		if isRight(msg) && m.cursor < 1 {
+			m.cursor++
+		}
+		if isEnter(msg) {
+			if m.cursor == 0 {
+				// Setup Another Environment
+				return m, func() tea.Msg { return resetMsg{} }
+			}
+			return m, tea.Quit
+		}
+		if msg.String() == "q" || isEsc(msg) {
 			return m, tea.Quit
 		}
 	}
@@ -54,9 +69,19 @@ func (m *completeModel) View() string {
 	b.WriteString("\n")
 	b.WriteString(mutedStyle.Render(fmt.Sprintf("  $ stackctl apply --env %s       # re-apply changes", m.state.env)))
 	b.WriteString("\n")
-	b.WriteString(mutedStyle.Render(fmt.Sprintf("  $ stackctl doctor                # verify system")))
-	b.WriteString("\n")
+	b.WriteString(mutedStyle.Render("  $ stackctl doctor                # verify system"))
+	b.WriteString("\n\n")
 
-	b.WriteString(helpStyle.Render("\n  press q or enter to exit"))
+	buttons := []string{"Setup Another Environment", "Exit"}
+	for i, btn := range buttons {
+		if i == m.cursor {
+			b.WriteString("  " + borderStyle.Render(selectedStyle.Render(btn)))
+		} else {
+			b.WriteString("  " + normalStyle.Render("["+btn+"]"))
+		}
+		b.WriteString("  ")
+	}
+
+	b.WriteString(helpStyle.Render("\n\n  left/right: navigate  enter: select  q: quit"))
 	return b.String()
 }

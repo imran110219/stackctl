@@ -133,7 +133,7 @@ func syncModuleAssets(cfg EnvConfig) error {
 	return nil
 }
 
-func composeBaseArgs(cfg EnvConfig) []string {
+func ComposeBaseArgs(cfg EnvConfig) []string {
 	return []string{
 		"compose",
 		"-f", filepath.Join(cfg.EnvDir, "compose.yml"),
@@ -143,10 +143,10 @@ func composeBaseArgs(cfg EnvConfig) []string {
 	}
 }
 
-func composeServiceExists(cfg EnvConfig, service string) bool {
-	args := composeBaseArgs(cfg)
+func ComposeServiceExists(cfg EnvConfig, service string) bool {
+	args := ComposeBaseArgs(cfg)
 	args = append(args, "config", "--services")
-	out, err := runCmdCapture("docker", args...)
+	out, err := RunCmdCapture("docker", args...)
 	if err != nil {
 		return false
 	}
@@ -158,10 +158,10 @@ func composeServiceExists(cfg EnvConfig, service string) bool {
 	return false
 }
 
-func composeServiceRunning(cfg EnvConfig, service string) bool {
-	args := composeBaseArgs(cfg)
+func ComposeServiceRunning(cfg EnvConfig, service string) bool {
+	args := ComposeBaseArgs(cfg)
 	args = append(args, "ps", "-q", service)
-	out, err := runCmdCapture("docker", args...)
+	out, err := RunCmdCapture("docker", args...)
 	if err != nil {
 		return false
 	}

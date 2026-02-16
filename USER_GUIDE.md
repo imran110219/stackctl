@@ -64,6 +64,25 @@ sudo usermod -aG docker "$USER"
 ```
 
 3. Log out and log back in so group changes take effect.
+
+### Option A: Interactive Setup (recommended)
+
+```bash
+stackctl setup
+```
+
+The setup wizard guides you through:
+- Choosing an environment (`dev`, `qa`, or `prod`) — existing environments are flagged with `[exists]`
+- Setting a domain (smart defaults: `dev.example.com` for dev, `qa.example.com` for qa, `example.com` for prod)
+- Setting an admin email
+- Selecting optional modules (dependencies are auto-resolved)
+- Running pre-flight system checks (Docker, disk space, port availability, etc.)
+- Initializing, enabling modules, and applying in one step
+
+After completion you can choose "Setup Another Environment" to configure additional environments without restarting the wizard.
+
+### Option B: CLI Setup
+
 4. Initialize each environment:
 
 ```bash
@@ -90,7 +109,9 @@ stackctl apply --env prod
 
 ## Daily Operations
 
-Enable or disable a module:
+### Module Management
+
+CLI:
 
 ```bash
 stackctl enable jaeger --env qa
@@ -98,13 +119,56 @@ stackctl disable jaeger --env qa
 stackctl apply --env qa
 ```
 
-Check status:
+Interactive module manager:
+
+```bash
+stackctl modules --env qa
+```
+
+The module manager lets you browse modules grouped by category, toggle them with `space`, search with `/`, view details with `d`, save with `s`, and save + apply with `a`. Dependency resolution is automatic (enabling `dozzle` auto-enables `socket-proxy`).
+
+### Monitoring
+
+CLI:
 
 ```bash
 stackctl status --env prod
 ```
 
-Run a backup:
+Interactive dashboard:
+
+```bash
+stackctl dash                  # overview of all environments
+stackctl dash --env prod       # jump directly to prod
+```
+
+The dashboard provides a live view with 5-second auto-refresh showing:
+- **Overview tab**: all environments with container counts and status (OK/DEGRADED/NOT DEPLOYED)
+- **Environment tab**: per-container table with service name, state, health, CPU, memory, and ports
+- **Detail tab**: full container info with quick actions — `r` to restart, `l` to view logs, `x` to open a shell
+
+### Configuration
+
+Edit `.env` secrets directly:
+
+```bash
+sudo -E $EDITOR /srv/stack/prod/.env
+```
+
+Interactive config editor:
+
+```bash
+stackctl config --env prod
+```
+
+The config editor provides:
+- Scrollable list of variables grouped by section (Core, Databases, Security, Backup)
+- Secret masking — passwords are hidden by default; press `u` to unmask
+- Password generation — press `g` to generate a secure 32-character password
+- Validation — press `v` to check for missing required fields, placeholder values, and short passwords
+- Automatic restart detection — after saving, shows which services need restarting and offers to apply immediately
+
+### Backups
 
 ```bash
 stackctl backup --env prod
@@ -116,11 +180,31 @@ stackctl backup --env prod
 - Data volumes: `/srv/data/<env>`
 - Backups: `/srv/backups/<env>`
 
+## Keyboard Shortcuts
+
+Press `?` in any TUI screen to see a full keyboard shortcut reference.
+
+Common shortcuts across all TUI tools:
+
+| Key | Action |
+|---|---|
+| `ctrl+c` | Quit immediately |
+| `?` | Toggle help overlay |
+| `j` / `k` or arrows | Navigate up/down |
+| `h` / `l` or arrows | Navigate left/right |
+| `enter` | Confirm / select |
+| `esc` | Go back / cancel |
+| `space` | Toggle selection |
+| `tab` | Switch tabs (dashboard) |
+| `/` | Search (module manager) |
+| `q` | Quit current tool |
+
 ## Troubleshooting
 
 - `permission denied` under `/srv`: run the command with `sudo` or fix directory ownership.
 - Docker not running: `sudo systemctl start docker`
 - Templates not found: set `STACKCTL_TEMPLATES` to the templates directory.
+- TUI renders incorrectly: ensure your terminal supports 256 colors and Unicode.
 
 ## Uninstall
 

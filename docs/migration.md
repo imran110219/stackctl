@@ -26,3 +26,11 @@ These scripts package or restore `/srv/stack/<env>`, `/srv/data/<env>`, `/srv/ba
 2. Nginx routes `app/api/kc` subdomains correctly.
 3. Optional modules respond on loopback.
 4. Backup timer status is healthy.
+
+You can also use the interactive dashboard to verify restored environments:
+
+```bash
+stackctl dash
+```
+
+The dashboard overview tab shows all detected environments with status (OK/DEGRADED/NOT DEPLOYED). Select an environment to inspect individual container states, health checks, CPU/memory usage, and port bindings. Use `r` to restart unhealthy services, `l` to view logs, or `x` to open a shell for debugging.

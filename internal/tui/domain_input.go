@@ -11,9 +11,9 @@ import (
 var domainRegex = regexp.MustCompile(`^[a-zA-Z0-9]([a-zA-Z0-9-]*\.)+[a-zA-Z]{2,}$`)
 
 type domainInputModel struct {
-	state    *wizardState
-	input    textinput.Model
-	errMsg   string
+	state  *wizardState
+	input  textinput.Model
+	errMsg string
 }
 
 func newDomainInputModel(state *wizardState) *domainInputModel {
@@ -31,6 +31,16 @@ func newDomainInputModel(state *wizardState) *domainInputModel {
 func (m *domainInputModel) Init() tea.Cmd {
 	if m.state.domain != "" {
 		m.input.SetValue(m.state.domain)
+	} else {
+		// Smart default based on environment
+		switch m.state.env {
+		case "dev":
+			m.input.SetValue("dev.example.com")
+		case "qa":
+			m.input.SetValue("qa.example.com")
+		default:
+			m.input.SetValue("example.com")
+		}
 	}
 	m.input.Focus()
 	return textinput.Blink

@@ -19,6 +19,20 @@ Each environment gets its own config, data, backups, and module toggles under `/
 
 ## Quickstart
 
+### Interactive (recommended)
+
+```bash
+# 1) Install stackctl safely (installs binary + templates only)
+./install.sh
+
+# 2) Launch the interactive setup wizard
+stackctl setup
+```
+
+The setup wizard walks through environment selection, domain/email configuration, module selection, pre-flight checks, and applies everything automatically.
+
+### CLI
+
 ```bash
 # 1) Install stackctl safely (installs binary + templates only)
 ./install.sh
@@ -50,6 +64,8 @@ stackctl status --env prod
 
 ## Commands
 
+### CLI commands
+
 ```bash
 stackctl init --env dev|qa|prod [--domain example.com] [--email admin@example.com]
 stackctl enable <module> --env dev|qa|prod
@@ -59,6 +75,22 @@ stackctl apply --env dev|qa|prod
 stackctl backup --env dev|qa|prod
 stackctl doctor
 ```
+
+### Interactive TUI commands
+
+```bash
+stackctl setup                        # interactive setup wizard
+stackctl modules [--env dev|qa|prod]  # module manager
+stackctl dash [--env dev|qa|prod]     # status dashboard
+stackctl config [--env dev|qa|prod]   # configuration editor
+```
+
+- **`setup`** — Step-by-step wizard: environment selection, domain/email input, module selection, pre-flight system checks, then init + enable + apply. Supports setting up multiple environments in one session.
+- **`modules`** — Browse, enable/disable, search, and apply modules with a detail pane showing ports, dependencies, and running status.
+- **`dash`** — Live dashboard with auto-refresh showing all environments, per-environment container tables with CPU/memory, and quick actions (restart, logs, shell).
+- **`config`** — Edit `.env` variables with secret masking, password generation, validation checks, and automatic service restart detection.
+
+Press `?` in any TUI screen to view keyboard shortcuts.
 
 ## What `init` creates
 
@@ -126,6 +158,16 @@ See `docs/migration.md` for full flow and `.tar.zst` helpers.
 6. Disable module in `qa`, apply, and confirm service is removed.
 7. Run `stackctl backup --env prod` and validate backup files in `/srv/backups/prod/`.
 8. Reboot VM and verify systemd auto-start behavior.
+
+## Manual test plan (TUI)
+
+1. `stackctl setup` — complete full wizard flow for `dev` environment; verify pre-flight checks run and environment is created.
+2. On the completion screen, choose "Setup Another Environment" and set up `qa`; verify the wizard resets correctly.
+3. `stackctl modules --env dev` — toggle a module on/off, verify save and apply work, verify search filters modules.
+4. `stackctl dash` — verify overview shows all environments, select one to view containers, verify auto-refresh updates.
+5. `stackctl dash --env dev` — verify it opens directly to the selected environment.
+6. `stackctl config --env dev` — edit a variable, verify secret masking, generate a password, run validation, save and verify restart prompt.
+7. Press `?` from any TUI screen — verify help overlay shows and dismisses correctly.
 
 ## Troubleshooting
 

@@ -34,12 +34,14 @@ type stepDoneMsg struct {
 }
 
 type progressModel struct {
-	state   *wizardState
-	steps   []progressStep
-	spinner spinner.Model
-	current int
-	done    bool
-	errMsg  string
+	state     *wizardState
+	steps     []progressStep
+	spinner   spinner.Model
+	current   int
+	done      bool
+	errMsg    string
+	failedIdx int
+	cursor    int // 0=Retry, 1=Exit
 }
 
 func newProgressModel(state *wizardState) *progressModel {
@@ -62,6 +64,8 @@ func (m *progressModel) Init() tea.Cmd {
 	m.current = 0
 	m.done = false
 	m.errMsg = ""
+	m.failedIdx = -1
+	m.cursor = 0
 	for i := range m.steps {
 		m.steps[i].status = stepPending
 		m.steps[i].err = nil
@@ -151,7 +155,9 @@ func (m *progressModel) Update(msg tea.Msg) (screenModel, tea.Cmd) {
 			m.steps[msg.index].status = stepFailed
 			m.steps[msg.index].err = msg.err
 			m.errMsg = msg.err.Error()
+			m.failedIdx = msg.index
 			m.done = true
+			m.cursor = 0
 			return m, nil
 		}
 
@@ -166,7 +172,24 @@ func (m *progressModel) Update(msg tea.Msg) (screenModel, tea.Cmd) {
 
 	case tea.KeyMsg:
 		if m.done && m.errMsg != "" {
-			if isEnter(msg) || isEsc(msg) {
+			if isLeft(msg) && m.cursor > 0 {
+				m.cursor--
+			}
+			if isRight(msg) && m.cursor < 1 {
+				m.cursor++
+			}
+			if isEnter(msg) {
+				if m.cursor == 0 {
+					// Retry: re-run from the failed step
+					m.steps[m.failedIdx].status = stepRunning
+					m.steps[m.failedIdx].err = nil
+					m.errMsg = ""
+					m.done = false
+					return m, tea.Batch(m.spinner.Tick, m.runStep(m.failedIdx))
+				}
+				return m, tea.Quit
+			}
+			if isEsc(msg) {
 				return m, tea.Quit
 			}
 		}
@@ -198,8 +221,18 @@ func (m *progressModel) View() string {
 	if m.errMsg != "" {
 		b.WriteString("\n")
 		b.WriteString(errorStyle.Render("  Error: " + m.errMsg))
-		b.WriteString("\n")
-		b.WriteString(helpStyle.Render("\n  press enter or esc to exit"))
+		b.WriteString("\n\n")
+
+		buttons := []string{"Retry", "Exit"}
+		for i, btn := range buttons {
+			if i == m.cursor {
+				b.WriteString("  " + borderStyle.Render(selectedStyle.Render(btn)))
+			} else {
+				b.WriteString("  " + normalStyle.Render("["+btn+"]"))
+			}
+			b.WriteString("  ")
+		}
+		b.WriteString(helpStyle.Render("\n\n  left/right: navigate  enter: select"))
 	}
 
 	return b.String()

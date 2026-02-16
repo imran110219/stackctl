@@ -48,9 +48,9 @@ func writeSystemdFiles(cfg EnvConfig) error {
 				return err
 			}
 		}
-		_ = runCmdStream("systemctl", "daemon-reload")
-		_ = runCmdStream("systemctl", "enable", fmt.Sprintf("stackctl-%s.service", cfg.EnvName))
-		_ = runCmdStream("systemctl", "enable", fmt.Sprintf("stackctl-backup-%s.timer", cfg.EnvName))
+		_ = RunCmdStream("systemctl", "daemon-reload")
+		_ = RunCmdStream("systemctl", "enable", fmt.Sprintf("stackctl-%s.service", cfg.EnvName))
+		_ = RunCmdStream("systemctl", "enable", fmt.Sprintf("stackctl-backup-%s.timer", cfg.EnvName))
 	}
 	return nil
 }

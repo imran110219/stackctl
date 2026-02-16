@@ -10,7 +10,7 @@ func ensureDir(path string, mode os.FileMode) error {
 	return os.MkdirAll(path, mode)
 }
 
-func dirExists(path string) bool {
+func DirExists(path string) bool {
 	info, err := os.Stat(path)
 	if err != nil {
 		return false

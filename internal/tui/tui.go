@@ -15,13 +15,17 @@ const (
 	screenEmailInput
 	screenModuleSelect
 	screenConfirm
+	screenPreflight
 	screenProgress
 	screenComplete
+	screenHelp
 )
 
 type navigateMsg struct {
 	to screen
 }
+
+type resetMsg struct{}
 
 type wizardState struct {
 	env     string
@@ -38,6 +42,7 @@ type screenModel interface {
 
 type rootModel struct {
 	current  screen
+	previous screen
 	state    *wizardState
 	screens  map[screen]screenModel
 	width    int
@@ -54,8 +59,10 @@ func StartWizard() error {
 		screenEmailInput:   newEmailInputModel(state),
 		screenModuleSelect: newModuleSelectModel(state),
 		screenConfirm:      newConfirmModel(state),
+		screenPreflight:    newPreflightModel(state),
 		screenProgress:     newProgressModel(state),
 		screenComplete:     newCompleteModel(state),
+		screenHelp:         newHelpModel(),
 	}
 
 	m := rootModel{
@@ -85,12 +92,33 @@ func (m rootModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.quitting = true
 			return m, tea.Quit
 		}
+		// Help overlay accessible via '?' from any non-progress screen
+		if msg.String() == "?" && m.current != screenProgress && m.current != screenHelp {
+			m.previous = m.current
+			m.current = screenHelp
+			return m, m.screens[m.current].Init()
+		}
 
 	case navigateMsg:
 		m.current = msg.to
 		s := m.screens[m.current]
 		initCmd := s.Init()
 		return m, initCmd
+
+	case resetMsg:
+		m.state.env = ""
+		m.state.domain = ""
+		m.state.email = ""
+		m.state.modules = nil
+		// Recreate module select to clear selections
+		m.screens[screenModuleSelect] = newModuleSelectModel(m.state)
+		m.current = screenEnvSelect
+		s := m.screens[m.current]
+		return m, s.Init()
+
+	case helpReturnMsg:
+		m.current = m.previous
+		return m, nil
 	}
 
 	s := m.screens[m.current]
@@ -107,11 +135,13 @@ func (m rootModel) View() string {
 	s := m.screens[m.current]
 	content := s.View()
 
-	if m.current != screenProgress && m.current != screenComplete {
+	// Show step indicator for wizard screens (not preflight, progress, complete, help)
+	if m.current != screenPreflight && m.current != screenProgress &&
+		m.current != screenComplete && m.current != screenHelp {
 		step := int(m.current)
-		total := int(screenComplete)
-		if step > 0 && step < total {
-			progress := mutedStyle.Render(fmt.Sprintf("Step %d of %d", step, total-1))
+		total := int(screenConfirm) // Last "step" screen
+		if step > 0 && step <= total {
+			progress := mutedStyle.Render(fmt.Sprintf("Step %d of %d", step, total))
 			content = content + "\n" + progress
 		}
 	}

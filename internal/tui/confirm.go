@@ -42,7 +42,7 @@ func (m *confirmModel) Update(msg tea.Msg) (screenModel, tea.Cmd) {
 		if isEnter(msg) {
 			switch m.cursor {
 			case 0: // Confirm
-				return m, func() tea.Msg { return navigateMsg{to: screenProgress} }
+				return m, func() tea.Msg { return navigateMsg{to: screenPreflight} }
 			case 1: // Back
 				return m, func() tea.Msg { return navigateMsg{to: screenModuleSelect} }
 			case 2: // Cancel
@@ -99,12 +99,3 @@ func (m *confirmModel) View() string {
 	return b.String()
 }
 
-func isLeft(msg tea.KeyMsg) bool {
-	k := msg.String()
-	return k == "left" || k == "h"
-}
-
-func isRight(msg tea.KeyMsg) bool {
-	k := msg.String()
-	return k == "right" || k == "l"
-}

@@ -41,7 +41,7 @@ func LoadEnvConfig(env string) (EnvConfig, error) {
 	if env != "dev" && env != "qa" && env != "prod" {
 		return EnvConfig{}, errors.New("--env must be one of: dev, qa, prod")
 	}
-	stackRoot := getStackRoot()
+	stackRoot := GetStackRoot()
 	cfg := EnvConfig{
 		EnvName:    env,
 		StackRoot:  stackRoot,
@@ -94,7 +94,70 @@ func ReadDotEnv(path string) (map[string]string, error) {
 	return vars, nil
 }
 
-func getStackRoot() string {
+func WriteDotEnv(path string, vars map[string]string) error {
+	// Read original file to preserve comments and ordering
+	file, err := os.Open(path)
+	if err != nil {
+		// File doesn't exist, write all vars
+		var b strings.Builder
+		for k, v := range vars {
+			b.WriteString(k + "=" + v + "\n")
+		}
+		return os.WriteFile(path, []byte(b.String()), 0o640)
+	}
+	defer file.Close()
+
+	written := map[string]bool{}
+	var lines []string
+	s := bufio.NewScanner(file)
+	for s.Scan() {
+		line := s.Text()
+		trimmed := strings.TrimSpace(line)
+		if trimmed == "" || strings.HasPrefix(trimmed, "#") {
+			lines = append(lines, line)
+			continue
+		}
+		parts := strings.SplitN(trimmed, "=", 2)
+		if len(parts) != 2 {
+			lines = append(lines, line)
+			continue
+		}
+		key := strings.TrimSpace(parts[0])
+		if newVal, ok := vars[key]; ok {
+			lines = append(lines, key+"="+newVal)
+			written[key] = true
+		} else {
+			lines = append(lines, line)
+		}
+	}
+	if err := s.Err(); err != nil {
+		return err
+	}
+	file.Close()
+
+	// Append any new keys that weren't in original file
+	for k, v := range vars {
+		if !written[k] {
+			lines = append(lines, k+"="+v)
+		}
+	}
+
+	content := strings.Join(lines, "\n") + "\n"
+	return os.WriteFile(path, []byte(content), 0o640)
+}
+
+func DetectEnvironments() []string {
+	stackRoot := GetStackRoot()
+	envs := []string{}
+	for _, name := range []string{"dev", "qa", "prod"} {
+		if DirExists(filepath.Join(stackRoot, name)) {
+			envs = append(envs, name)
+		}
+	}
+	return envs
+}
+
+func GetStackRoot() string {
 	if v := strings.TrimSpace(os.Getenv("STACKCTL_STACK_ROOT")); v != "" {
 		return v
 	}
