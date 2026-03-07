@@ -99,9 +99,8 @@ func ensureDotEnv(cfg EnvConfig) error {
 		return nil
 	}
 
-	tplPath := filepath.Join(findTemplatesDir(), ".env.example")
 	data := cfg.RenderData()
-	text, err := renderFile(tplPath, data)
+	text, err := renderFile(".env.example", data)
 	if err != nil {
 		return fmt.Errorf("render .env template: %w", err)
 	}
@@ -114,8 +113,7 @@ func ensureComposeOverride(cfg EnvConfig) error {
 		return nil
 	}
 
-	tplPath := filepath.Join(findTemplatesDir(), "base", "compose.override.yml")
-	content, err := os.ReadFile(tplPath)
+	content, err := readTemplateFile("base/compose.override.yml")
 	if err != nil {
 		return err
 	}

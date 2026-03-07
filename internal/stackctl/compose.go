@@ -13,11 +13,9 @@ import (
 )
 
 func writeCompose(cfg EnvConfig, enabledModules []string) error {
-	templates := findTemplatesDir()
 	data := cfg.RenderData()
 
-	basePath := filepath.Join(templates, "base", "compose.base.yml")
-	rendered, err := renderFile(basePath, data)
+	rendered, err := renderFile("base/compose.base.yml", data)
 	if err != nil {
 		return err
 	}
@@ -28,9 +26,11 @@ func writeCompose(cfg EnvConfig, enabledModules []string) error {
 	}
 
 	// Only merge enabled modules, not all modules in the catalog.
+	templateFS := getTemplatesFS()
 	for _, module := range enabledModules {
-		modPath := filepath.Join(templates, "modules", module, "compose.yml")
-		if _, err := os.Stat(modPath); errors.Is(err, fs.ErrNotExist) {
+		modPath := filepath.Join("modules", module, "compose.yml")
+		// Check if module compose file exists
+		if _, err := fs.Stat(templateFS, modPath); errors.Is(err, fs.ErrNotExist) {
 			continue
 		}
 		modRendered, err := renderFile(modPath, data)
@@ -87,10 +87,10 @@ func deepMerge(dst, src map[string]any) {
 }
 
 func syncModuleAssets(cfg EnvConfig) error {
-	templates := findTemplatesDir()
-	modulesDir := filepath.Join(templates, "modules")
-	entries, err := os.ReadDir(modulesDir)
+	templateFS := getTemplatesFS()
+	entries, err := fs.ReadDir(templateFS, "modules")
 	if err != nil {
+		// If modules directory doesn't exist, that's okay
 		return nil
 	}
 
@@ -99,10 +99,10 @@ func syncModuleAssets(cfg EnvConfig) error {
 			continue
 		}
 		moduleName := entry.Name()
-		srcDir := filepath.Join(modulesDir, moduleName)
+		srcDir := filepath.Join("modules", moduleName)
 		dstDir := filepath.Join(cfg.EnvDir, moduleName)
 
-		err := filepath.WalkDir(srcDir, func(path string, d fs.DirEntry, walkErr error) error {
+		err := fs.WalkDir(templateFS, srcDir, func(path string, d fs.DirEntry, walkErr error) error {
 			if walkErr != nil {
 				return walkErr
 			}
@@ -122,9 +122,16 @@ func syncModuleAssets(cfg EnvConfig) error {
 
 			target := filepath.Join(dstDir, rel)
 			if _, err := os.Stat(target); err == nil {
+				// Don't overwrite existing files
 				return nil
 			}
-			return copyFile(path, target)
+
+			// Read from embedded FS and write to target
+			content, err := fs.ReadFile(templateFS, path)
+			if err != nil {
+				return err
+			}
+			return os.WriteFile(target, content, 0o640)
 		})
 		if err != nil {
 			return fmt.Errorf("sync module assets for %s: %w", moduleName, err)

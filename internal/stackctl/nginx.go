@@ -12,11 +12,10 @@ func writeNginxConfs(cfg EnvConfig, modules []string) error {
 		return err
 	}
 
-	templates := findTemplatesDir()
 	data := cfg.RenderData()
 
 	render := func(templateName, targetName string) error {
-		inPath := filepath.Join(templates, "nginx", templateName)
+		inPath := filepath.Join("nginx", templateName)
 		text, err := renderFile(inPath, data)
 		if err != nil {
 			return fmt.Errorf("render nginx %s: %w", templateName, err)

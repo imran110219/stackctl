@@ -4,11 +4,15 @@ import (
 	"fmt"
 	"os"
 
+	stackctlpkg "github.com/example/stackctl"
 	"github.com/example/stackctl/internal/stackctl"
 	"github.com/example/stackctl/internal/tui"
 )
 
 func main() {
+	// Initialize stackctl with embedded templates
+	stackctl.InitTemplates(stackctlpkg.EmbeddedTemplates)
+
 	args := os.Args[1:]
 
 	if len(args) > 0 {
