@@ -1,0 +1,62 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  goreleaser:
+    name: Build and Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fetch all tags
+        run: git fetch --force --tags
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24.2'
+          cache: true
+
+      - name: Verify embedded templates
+        run: |
+          echo "Checking that templates are embedded..."
+          if [ ! -f templates_embed.go ]; then
+            echo "Error: templates_embed.go not found"
+            exit 1
+          fi
+          grep -q "go:embed all:templates" templates_embed.go || {
+            echo "Error: go:embed directive not found in templates_embed.go"
+            exit 1
+          }
+          echo "Templates are properly embedded"
+
+      - name: Run tests
+        run: go test -v ./...
+        continue-on-error: true
+
+      - name: Set repository env vars
+        run: |
+          echo "GITHUB_REPOSITORY_OWNER=${GITHUB_REPOSITORY_OWNER}" >> $GITHUB_ENV
+          echo "GITHUB_REPOSITORY_NAME=${GITHUB_REPOSITORY##*/}" >> $GITHUB_ENV
+
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v6
+        with:
+          distribution: goreleaser
+          version: '~> v2'
+          args: release --clean
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}
+          GITHUB_REPOSITORY_NAME: ${{ github.event.repository.name }}

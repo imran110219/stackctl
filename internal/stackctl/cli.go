@@ -9,6 +9,14 @@ import (
 	"strings"
 )
 
+// Version information (set by main package)
+var (
+	Version = "dev"
+	Commit  = "none"
+	Date    = "unknown"
+	BuiltBy = "manual"
+)
+
 func Run(args []string) error {
 	if len(args) < 1 {
 		usage()
@@ -33,6 +41,8 @@ func Run(args []string) error {
 		return cmdBackup(cmdArgs)
 	case "doctor":
 		return RunDoctor()
+	case "version", "--version", "-v":
+		return cmdVersion()
 	case "help", "--help", "-h":
 		usage()
 		return nil
@@ -52,6 +62,7 @@ Usage:
   stackctl apply --env dev|qa|prod
   stackctl backup --env dev|qa|prod
   stackctl doctor
+  stackctl version                  # show version information
   stackctl setup                    # interactive setup wizard
   stackctl modules [--env dev|qa|prod]  # module manager
   stackctl dash [--env dev|qa|prod]     # status dashboard
@@ -253,4 +264,14 @@ func cmdBackup(args []string) error {
 	}
 
 	return runBackup(cfg)
+}
+
+func cmdVersion() error {
+	fmt.Printf("stackctl %s\n", Version)
+	if Commit != "none" || Date != "unknown" {
+		fmt.Printf("  commit: %s\n", Commit)
+		fmt.Printf("  built:  %s\n", Date)
+		fmt.Printf("  by:     %s\n", BuiltBy)
+	}
+	return nil
 }

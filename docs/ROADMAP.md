@@ -1,6 +1,6 @@
 # stackctl Roadmap
 
-**Last Updated**: 2026-03-08 (Task H completed)
+**Last Updated**: 2026-03-09 (Binary distribution system completed - Tasks 3 & 4)
 
 This document tracks all features from MVP to advanced capabilities. It serves as the single source of truth for project progress and helps coordinate development.
 
@@ -48,7 +48,7 @@ Self-hosting developers who want a minimal, opinionated platform without the com
 | `stackctl enable/disable` | ✅ Done | 🔴 Must-Do | Toggle modules per environment |
 | `stackctl backup` | ✅ Done | 🔴 Must-Do | Dump databases + push to restic |
 | `stackctl doctor` | ✅ Done | 🔴 Must-Do | Pre-flight system checks (Docker, ports, permissions) |
-| `stackctl version` | 📋 Planned | 🟡 Nice-to-Have | Show version and build info |
+| `stackctl version` | ✅ Done | 🟡 Nice-to-Have | Show version and build info |
 | `stackctl destroy` | 📋 Planned | 🟡 Nice-to-Have | Tear down environment with confirmation |
 
 ### Interactive TUI Commands
@@ -92,9 +92,9 @@ Self-hosting developers who want a minimal, opinionated platform without the com
 | Feature | Status | Priority | Description |
 |---------|--------|----------|-------------|
 | Embed templates with `go:embed` | ✅ Done | 🔴 Must-Do | Bundle templates in binary, no external files |
-| GoReleaser config | 📋 Planned | 🔴 Must-Do | `.goreleaser.yml` for linux/amd64 + arm64 |
-| GitHub Actions release workflow | 📋 Planned | 🔴 Must-Do | Auto-build on `v*` tags, publish to GitHub Releases |
-| Binary installer script | 📋 Planned | 🔴 Must-Do | Rewrite `install.sh` to download pre-built binary (no go/git needed) |
+| GoReleaser config | ✅ Done | 🔴 Must-Do | `.goreleaser.yml` for linux/amd64 + arm64 |
+| GitHub Actions release workflow | ✅ Done | 🔴 Must-Do | Auto-build on `v*` tags, publish to GitHub Releases |
+| Binary installer script | ✅ Done | 🔴 Must-Do | Rewrite `install.sh` to download pre-built binary (no go/git needed) |
 | Debian package (.deb) | 💡 Future | 🟡 Nice-to-Have | For organizations with APT repos |
 
 **Subtasks for go:embed**:
@@ -105,17 +105,22 @@ Self-hosting developers who want a minimal, opinionated platform without the com
 - [ ] Update install script to not copy templates (binary is self-contained) - pending Task I
 
 **Subtasks for GoReleaser**:
-- [ ] Create `.goreleaser.yml` with builds for linux/amd64 and linux/arm64
-- [ ] Configure archives, checksums, changelog generation
-- [ ] Add GitHub Actions workflow `.github/workflows/release.yml`
+- [x] Create `.goreleaser.yml` with builds for linux/amd64 and linux/arm64
+- [x] Configure archives, checksums, changelog generation
+- [x] Add GitHub Actions workflow `.github/workflows/release.yml`
+- [x] Add version variables to main.go for build info injection
+- [x] Create docs/RELEASE.md with release instructions
 - [ ] Test release process with a pre-release tag
 
 **Subtasks for installer**:
-- [ ] Rewrite `install.sh` to detect OS/arch
-- [ ] Download binary from GitHub Releases instead of building
-- [ ] Handle version selection (latest vs specific tag)
-- [ ] Remove `go` and `git` requirements
-- [ ] Update documentation
+- [x] Rewrite `install.sh` to detect OS/arch
+- [x] Download binary from GitHub Releases instead of building
+- [x] Handle version selection (latest vs specific tag)
+- [x] Remove `go` and `git` requirements
+- [x] Implement `stackctl version` command for verification
+- [x] Create docs/INSTALL_TESTING.md with testing procedures
+- [ ] Test installation on clean Ubuntu VMs (pending first release)
+- [ ] Update README.md and USER_GUIDE.md (pending successful tests)
 
 ### Package Refactoring
 | Feature | Status | Priority | Description |
@@ -226,10 +231,10 @@ Enable frictionless installation without requiring `go` or `git` on target serve
 **Tasks**:
 1. ✅ ~~Assess current state~~ (completed)
 2. ✅ ~~Embed templates with `go:embed`~~ (completed)
-3. 📋 Add GoReleaser config + GitHub Actions
-4. 📋 Rewrite install.sh for binary downloads
-5. 📋 Test installation on clean Ubuntu 22.04 and 24.04 VMs
-6. 📋 Update documentation (README.md, USER_GUIDE.md)
+3. ✅ ~~Add GoReleaser config + GitHub Actions~~ (completed)
+4. ✅ ~~Rewrite install.sh for binary downloads~~ (completed)
+5. 📋 Test installation on clean Ubuntu 22.04 and 24.04 VMs (blocked: needs first release)
+6. 📋 Update documentation (README.md, USER_GUIDE.md) (blocked: needs testing)
 
 ### Priority 2: Package Refactoring (Must-Do)
 Make codebase easier for contributors to understand and extend.

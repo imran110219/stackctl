@@ -9,9 +9,23 @@ import (
 	"github.com/example/stackctl/internal/tui"
 )
 
+// Build information injected by GoReleaser at build time
+var (
+	version = "dev"
+	commit  = "none"
+	date    = "unknown"
+	builtBy = "manual"
+)
+
 func main() {
 	// Initialize stackctl with embedded templates
 	stackctl.InitTemplates(stackctlpkg.EmbeddedTemplates)
+
+	// Set version information
+	stackctl.Version = version
+	stackctl.Commit = commit
+	stackctl.Date = date
+	stackctl.BuiltBy = builtBy
 
 	args := os.Args[1:]
 

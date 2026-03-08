@@ -1,0 +1,133 @@
+# GoReleaser configuration for stackctl
+# Docs: https://goreleaser.com
+
+version: 2
+
+# Build configuration
+builds:
+  - id: stackctl
+    main: ./cmd/stackctl
+    binary: stackctl
+
+    # Target platforms
+    goos:
+      - linux
+
+    goarch:
+      - amd64
+      - arm64
+
+    # Build flags
+    env:
+      - CGO_ENABLED=0
+
+    flags:
+      - -trimpath
+
+    ldflags:
+      - -s -w
+      - -X main.version={{.Version}}
+      - -X main.commit={{.Commit}}
+      - -X main.date={{.Date}}
+      - -X main.builtBy=goreleaser
+
+    # Ensure templates are embedded
+    hooks:
+      pre:
+        - go mod tidy
+        - go mod download
+
+# Archive configuration
+archives:
+  - id: default
+    format: tar.gz
+    name_template: >-
+      {{ .ProjectName }}_
+      {{- .Version }}_
+      {{- .Os }}_
+      {{- .Arch }}
+
+    files:
+      - LICENSE
+      - README.md
+      - USER_GUIDE.md
+      - docs/**/*
+
+    # Use zip for Windows if we add it later
+    format_overrides:
+      - goos: windows
+        format: zip
+
+# Checksum configuration
+checksum:
+  name_template: 'checksums.txt'
+  algorithm: sha256
+
+# Changelog configuration
+changelog:
+  use: github
+  sort: asc
+
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+      - '^chore:'
+      - '^ci:'
+      - 'typo'
+
+  groups:
+    - title: Features
+      regexp: '^.*?feat(\([[:word:]]+\))??!?:.+$'
+      order: 0
+    - title: Bug Fixes
+      regexp: '^.*?fix(\([[:word:]]+\))??!?:.+$'
+      order: 1
+    - title: Performance
+      regexp: '^.*?perf(\([[:word:]]+\))??!?:.+$'
+      order: 2
+    - title: Refactors
+      regexp: '^.*?refactor(\([[:word:]]+\))??!?:.+$'
+      order: 3
+    - title: Others
+      order: 999
+
+# GitHub Release configuration
+release:
+  github:
+    owner: "{{ .Env.GITHUB_REPOSITORY_OWNER }}"
+    name: "{{ .Env.GITHUB_REPOSITORY_NAME }}"
+
+  draft: false
+  prerelease: auto
+  mode: append
+
+  header: |
+    ## stackctl {{ .Tag }}
+
+    **Installation:**
+    ```bash
+    curl -fsSL https://raw.githubusercontent.com/{{ .Env.GITHUB_REPOSITORY_OWNER }}/{{ .Env.GITHUB_REPOSITORY_NAME }}/main/install.sh | bash
+    ```
+
+    Or download a binary directly from the assets below.
+
+  footer: |
+    ## Verification
+
+    Verify checksums:
+    ```bash
+    sha256sum -c checksums.txt
+    ```
+
+    ---
+
+    **Full Changelog**: https://github.com/{{ .Env.GITHUB_REPOSITORY_OWNER }}/{{ .Env.GITHUB_REPOSITORY_NAME }}/compare/{{ .PreviousTag }}...{{ .Tag }}
+
+# Announcement configuration (optional)
+announce:
+  skip: true
+
+# Metadata
+metadata:
+  mod_timestamp: '{{ .CommitTimestamp }}'
