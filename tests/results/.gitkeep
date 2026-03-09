@@ -1,0 +1,12 @@
+# Test Results
+
+Store VM test results here using the template from VM_TEST_PLAN.md
+
+## Naming Convention
+
+`v{version}-ubuntu-{os_version}-{arch}.md`
+
+Examples:
+- `v0.1.0-rc1-ubuntu-22.04-amd64.md`
+- `v0.1.0-rc1-ubuntu-24.04-amd64.md`
+- `v0.1.0-rc1-ubuntu-22.04-arm64.md`

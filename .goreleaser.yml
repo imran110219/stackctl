@@ -64,6 +64,8 @@ checksum:
   algorithm: sha256
 
 # Changelog configuration
+# Note: We maintain CHANGELOG.md manually for rich context
+# GoReleaser generates additional release notes from git commits
 changelog:
   use: github
   sort: asc
@@ -111,6 +113,8 @@ release:
     ```
 
     Or download a binary directly from the assets below.
+
+    📖 **For detailed release notes, see [CHANGELOG.md](https://github.com/{{ .Env.GITHUB_REPOSITORY_OWNER }}/{{ .Env.GITHUB_REPOSITORY_NAME }}/blob/{{ .Tag }}/CHANGELOG.md)**
 
   footer: |
     ## Verification

@@ -176,6 +176,38 @@ See `docs/migration.md` for full flow and `.tar.zst` helpers.
 - Module appears enabled but not running: run `stackctl apply --env <env>` after toggles.
 - Missing template path: set `STACKCTL_TEMPLATES=/path/to/templates`.
 
+## Development
+
+### Quick Commands
+
+```bash
+make help              # Show all available commands
+make build             # Build the binary
+make test              # Run tests
+make dev               # Format, build, and install in one step
+make version           # Check current version and what's changed
+```
+
+### Release Management
+
+```bash
+make version              # Check current status
+make changelog-prepare    # Prepare for a new release
+make release-snapshot     # Test build locally
+make release-dry-run      # Full release simulation
+```
+
+See [CHANGELOG.md](./CHANGELOG.md) for release history and [docs/RELEASE_WORKFLOW.md](./docs/RELEASE_WORKFLOW.md) for the complete release process.
+
+### Project Structure
+
+- `cmd/stackctl/` - CLI entry point
+- `internal/stackctl/` - Core logic (config, modules, compose, exec)
+- `internal/tui/` - Bubble Tea interactive interfaces
+- `templates/` - Embedded templates for nginx, systemd, modules
+- `scripts/` - Release and development helper scripts
+- `docs/` - Documentation and guides
+
 ## License
 
 MIT. See `LICENSE`.

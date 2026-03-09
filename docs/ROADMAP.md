@@ -1,6 +1,6 @@
 # stackctl Roadmap
 
-**Last Updated**: 2026-03-09 (Binary distribution system completed - Tasks 3 & 4)
+**Last Updated**: 2026-03-10 (v0.1.0-rc1 released - see CHANGELOG.md)
 
 This document tracks all features from MVP to advanced capabilities. It serves as the single source of truth for project progress and helps coordinate development.
 
@@ -233,7 +233,9 @@ Enable frictionless installation without requiring `go` or `git` on target serve
 2. ✅ ~~Embed templates with `go:embed`~~ (completed)
 3. ✅ ~~Add GoReleaser config + GitHub Actions~~ (completed)
 4. ✅ ~~Rewrite install.sh for binary downloads~~ (completed)
-5. 📋 Test installation on clean Ubuntu 22.04 and 24.04 VMs (blocked: needs first release)
+4.5. ✅ ~~Release v0.1.0-rc1~~ (completed 2026-03-09)
+4.6. ✅ ~~Create VM testing infrastructure~~ (completed 2026-03-10)
+5. 🚧 Test installation on clean Ubuntu 22.04 and 24.04 VMs (READY - test scripts created!)
 6. 📋 Update documentation (README.md, USER_GUIDE.md) (blocked: needs testing)
 
 ### Priority 2: Package Refactoring (Must-Do)
